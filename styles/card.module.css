@@ -1,0 +1,11 @@
+.card {
+  border: 1px solid black;
+  display: flex;
+  flex-direction: column;
+  width: 250px;
+  height: 250px;
+}
+
+.cardForm {
+  border: 1px solid red;
+}
