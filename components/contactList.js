@@ -12,6 +12,8 @@ const ContactList = () => {
 
   const { data, error } = useSwr("/api/contacts", fetcher);
 
+  if (error) throw error;
+
   useEffect(() => {
     setContacts(data || []);
   }, [data]);

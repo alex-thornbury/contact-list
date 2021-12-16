@@ -1,5 +1,5 @@
 import { Button, TextField, Card, CardContent } from "@material-ui/core";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "../styles/card.module.css";
 import { useSWRConfig } from "swr";
 
@@ -10,9 +10,32 @@ const defaultFormValues = {
   emailAddress: "",
 };
 
-const AddContactCard = () => {
+const AddContactCard = ({ contact, hoistCancelEvent }) => {
   const [formValues, setFormValues] = useState(defaultFormValues);
+  const [submitButtonTitle, setSubmitButtonTitle] = useState("ADD CONTACT");
   const { mutate } = useSWRConfig();
+
+  useEffect(() => {
+    if (contact) {
+      setFormValues({
+        firstName: contact.firstName,
+        lastName: contact.lastName,
+        phoneNumber: contact.phoneNumber,
+        emailAddress: contact.emailAddress,
+      });
+      setSubmitButtonTitle("SAVE CHANGES");
+    } else {
+      setFormValues(defaultFormValues);
+    }
+  }, [defaultFormValues, contact]);
+
+  const postSubmit = () => {
+    if (hoistCancelEvent) {
+      hoistCancelEvent();
+    }
+    setFormValues({ ...defaultFormValues });
+    setSubmitButtonTitle("ADD CONTACT");
+  };
 
   const handleAdd = async () => {
     try {
@@ -24,16 +47,43 @@ const AddContactCard = () => {
         body: JSON.stringify(formValues),
       });
       await mutate("/api/contacts");
-      setFormValues({ ...defaultFormValues });
-      console.log(formValues);
+      postSubmit();
     } catch (error) {
       console.error(error);
+    }
+  };
+
+  const handleEdit = async () => {
+    try {
+      await fetch(`/api/contact/${contact.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formValues),
+      });
+      await mutate("/api/contacts");
+      postSubmit();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (contact) {
+      await handleEdit();
+    } else {
+      await handleAdd();
     }
   };
 
   const handleInput = (e) => {
     const { name, value } = e.target;
     setFormValues({ ...formValues, [name]: value });
+  };
+
+  const handleCancel = () => {
+    hoistCancelEvent();
   };
 
   return (
@@ -75,9 +125,10 @@ const AddContactCard = () => {
           onChange={handleInput}
           value={formValues.phoneNumber}
         />
-        <Button type="submit" onClick={handleAdd}>
-          ADD NEW CONTACT
+        <Button type="submit" onClick={handleSubmit}>
+          {submitButtonTitle}
         </Button>
+        {hoistCancelEvent && <Button onClick={handleCancel}>CANCEL</Button>}
       </CardContent>
     </Card>
   );

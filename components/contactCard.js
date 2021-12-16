@@ -8,6 +8,7 @@ import {
 import React, { useState } from "react";
 import styles from "../styles/card.module.css";
 import { useSWRConfig } from "swr";
+import AddContactCard from "./addContactCard";
 
 const ContactCard = ({ contact }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -19,17 +20,21 @@ const ContactCard = ({ contact }) => {
       await fetch(`/api/contact/${contact.id}`, {
         method: "DELETE",
       });
-      mutate("/api/contacts");
+      await mutate("/api/contacts");
     } catch (error) {
       console.error(error);
     }
   };
 
   const handleEdit = () => {
-    alert("EDIT");
+    setIsEditing(!isEditing);
   };
 
-  return (
+  const handleCancelEvent = () => {
+    setIsEditing(false);
+  };
+
+  let card = (
     <Card className={styles.card}>
       <CardContent>
         <Typography variant="h3">{`${firstName} ${lastName}`}</Typography>
@@ -42,6 +47,14 @@ const ContactCard = ({ contact }) => {
       </CardContent>
     </Card>
   );
+
+  if (isEditing) {
+    card = (
+      <AddContactCard contact={contact} hoistCancelEvent={handleCancelEvent} />
+    );
+  }
+
+  return card;
 };
 
 export default ContactCard;

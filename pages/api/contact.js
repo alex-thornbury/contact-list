@@ -1,8 +1,16 @@
-import { addContact, createContact } from "../../database";
+import { addContact } from "../../database";
+import ContactMapper from "../../mappers/contact.mapper";
+import DatabaseService from "../../services/database.service";
 
 export default function handler(req, res) {
-  const { body } = req;
-  console.log("REQ BODY", body);
-  addContact(createContact(body));
-  res.status(204).send();
+  try {
+    const { body } = req;
+    const id = DatabaseService.generateDatabaseID(body);
+    const entity = ContactMapper.toEntity(id, body);
+    addContact(ContactMapper.toStorage(entity));
+    res.status(204).send();
+  } catch (error) {
+    console.error(error);
+    res.status(500).send();
+  }
 }
