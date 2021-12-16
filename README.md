@@ -8,6 +8,8 @@ First, run the development server using Docker compose and make:
 make up
 ```
 
+If you dont have make, just use docker compose commands
+
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
